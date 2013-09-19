@@ -18,7 +18,7 @@ func main() {
 		return
 	}
 
-	if ok, _ := regexp.MatchString("next|prev|pause", action); ok == false {
+	if ok, err := regexp.MatchString("next|prev|pause", action); ok == false || err != nil {
 		fmt.Printf("Invalid action %s\n", action)
 		return
 	}
