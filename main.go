@@ -2,7 +2,7 @@ package main
 
 import (
 	dbus "github.com/guelfey/go.dbus"
-	dbusprop "github.com/guelfey/go.dbus/prop"
+	introspect "github.com/guelfey/go.dbus/introspect"
 	"fmt"
 	"flag"
 )
@@ -52,15 +52,15 @@ func PlayPause() {
 	spotbus().Call("PlayPause", 0)
 }
 
-// FIXME doesnt work
-func CurSong(c *dbus.Conn) (dbus.Variant, error) {
-	data := map[string]map[string]*dbusprop.Prop {
-		"org.mpris.MediaPlayer2.spotify": {
-			"Metadata": {
-			},
-		},
-	}
-	prop := dbusprop.New(c, "org.freedesktop.DBus.Properties.Get", data)
+type metadata interface {
+	url() string
+}
 
-	return prop.Get("org.mpris.MediaPlayer2.Player", "Metadata")
+// FIXME doesnt work
+func CurSong() *introspect.Node {
+	conn, _ := dbus.SessionBus()
+
+	node, _ := introspect.Call(conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2"))
+
+	return node
 }
