@@ -5,7 +5,6 @@ import (
 	dbusprop "github.com/guelfey/go.dbus/prop"
 	"fmt"
 	"flag"
-	"regexp"
 )
 
 func main() {
@@ -18,40 +17,40 @@ func main() {
 		return
 	}
 
-	if ok, err := regexp.MatchString("next|prev|pause", action); ok == false || err != nil {
+	switch (action) {
+	case "next":
+		Next()
+	case "prev":
+		Previous()
+	case "pause":
+		PlayPause()
+	default:
 		fmt.Printf("Invalid action %s\n", action)
 		return
 	}
+}
 
+func spotbus() *dbus.Object {
 	conn, err := dbus.SessionBus()
+
 	if err != nil {
 		panic(err)
 	}
 
-	sdbus := conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2")
-
-	switch (action) {
-	case "next":
-		Next(sdbus)
-	case "prev":
-		Previous(sdbus)
-	case "pause":
-		PlayPause(sdbus)
-	}
+	return conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2")
 }
 
-func Next(o *dbus.Object) *dbus.Call {
-	return o.Call("Next", 0)
+func Next() {
+	spotbus().Call("Next", 0)
 }
 
-func Previous(o *dbus.Object) *dbus.Call {
-	return o.Call("Previous", 0)
+func Previous() {
+	spotbus().Call("Previous", 0)
 }
 
-func PlayPause(o *dbus.Object) *dbus.Call {
-	return o.Call("PlayPause", 0)
+func PlayPause() {
+	spotbus().Call("PlayPause", 0)
 }
-
 
 // FIXME doesnt work
 func CurSong(c *dbus.Conn) (dbus.Variant, error) {
