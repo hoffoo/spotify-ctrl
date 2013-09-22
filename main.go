@@ -1,10 +1,9 @@
 package main
 
 import (
-	dbus "github.com/guelfey/go.dbus"
-	introspect "github.com/guelfey/go.dbus/introspect"
-	"fmt"
 	"flag"
+	"fmt"
+	dbus "github.com/guelfey/go.dbus"
 )
 
 func main() {
@@ -17,20 +16,22 @@ func main() {
 		return
 	}
 
-	switch (action) {
+	switch action {
 	case "next":
 		Next()
 	case "prev":
 		Previous()
 	case "pause":
 		PlayPause()
+	case "cur":
+		CurSong()
 	default:
 		fmt.Printf("Invalid action %s\n", action)
 		return
 	}
 }
 
-func spotbus() *dbus.Object {
+func connDbus() *dbus.Object {
 	conn, err := dbus.SessionBus()
 
 	if err != nil {
@@ -41,26 +42,31 @@ func spotbus() *dbus.Object {
 }
 
 func Next() {
-	spotbus().Call("Next", 0)
+	connDbus().Call("Next", 0)
 }
 
 func Previous() {
-	spotbus().Call("Previous", 0)
+	connDbus().Call("Previous", 0)
 }
 
 func PlayPause() {
-	spotbus().Call("PlayPause", 0)
+	connDbus().Call("PlayPause", 0)
 }
 
-type metadata interface {
-	url() string
-}
+func CurSong() {
+	data := new(dbus.Variant)
+	err := connDbus().Call("Get", 0, "org.mpris.MediaPlayer2.Player","Metadata").Store(data)
 
-// FIXME doesnt work
-func CurSong() *introspect.Node {
-	conn, _ := dbus.SessionBus()
+	if err != nil {
+		panic(err)
+	}
 
-	node, _ := introspect.Call(conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2"))
+	songData := data.Value().(map[string]dbus.Variant)
 
-	return node
+	title := songData["xesam:title"]
+	// buggy spotify dbus only sends a single artist
+	artist := songData["xesam:artist"].Value().([]string)
+	rating := int(songData["xesam:autoRating"].Value().(float64) * 100)
+
+	fmt.Printf("%s %s (%d)", artist[0], title, rating)
 }
