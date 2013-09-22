@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	dbus "github.com/guelfey/go.dbus"
 )
 
@@ -55,28 +55,23 @@ func PlayPause() {
 }
 
 func CurSong() {
-	sdata := new(dbus.Variant)				// song data
-	pstatus := new(dbus.Variant)			// playing status
-
-	sdbus := connDbus()
+	sdata   := new(dbus.Variant)   // song data
+	pstatus := new(dbus.Variant) // playing status
+	sdbus   := connDbus()
 
 	// get song data, quit on err
-	err := sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player","Metadata").Store(sdata)
-
+	err := sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player", "Metadata").Store(sdata)
 	if err != nil {
 		// most likely spotify not running
 		return
 	}
-
-	sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player","PlaybackStatus").Store(pstatus)
-
-
-	songData := sdata.Value().(map[string]dbus.Variant)
+	sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player", "PlaybackStatus").Store(pstatus)
 
 	// buggy spotify dbus only sends a single artist
-	artist := songData["xesam:artist"].Value().([]string)
-	title := songData["xesam:title"]
-	rating := int(songData["xesam:autoRating"].Value().(float64) * 100)
+	songData := sdata.Value().(map[string]dbus.Variant)
+	artist   := songData["xesam:artist"].Value().([]string)
+	title    := songData["xesam:title"]
+	rating   := int(songData["xesam:autoRating"].Value().(float64) * 100)
 
 	if songStatus := pstatus.Value().(string); songStatus == "Paused" {
 		fmt.Printf("(paused) %s %s (paused)", artist[0], title)
