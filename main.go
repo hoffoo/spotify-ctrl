@@ -32,6 +32,7 @@ func main() {
 }
 
 func connDbus() *dbus.Object {
+
 	conn, err := dbus.SessionBus()
 
 	// couldnt connect to session bus
@@ -55,8 +56,9 @@ func PlayPause() {
 }
 
 func CurSong() {
-	sdata   := new(dbus.Variant)   // song data
-	pstatus := new(dbus.Variant) // playing status
+
+	sdata   := new(dbus.Variant)	// song data
+	pstatus := new(dbus.Variant)	// playing status
 	sdbus   := connDbus()
 
 	// get song data, quit on err
@@ -78,5 +80,4 @@ func CurSong() {
 	} else {
 		fmt.Printf("%s %s (%d)", artist[0], title, rating)
 	}
-
 }
