@@ -58,8 +58,9 @@ func CurSong() {
 	sdata := new(dbus.Variant)
 	// playing status
 	pstatus := new(dbus.Variant)
-	connDbus().Call("Get", 0, "org.mpris.MediaPlayer2.Player","Metadata").Store(sdata)
-	err := connDbus().Call("Get", 0, "org.mpris.MediaPlayer2.Player","PlaybackStatus").Store(pstatus)
+	sdbus := connDbus()
+	sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player","Metadata").Store(sdata)
+	err := sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player","PlaybackStatus").Store(pstatus)
 
 	if err != nil {
 		// most likely spotify not running
