@@ -11,11 +11,6 @@ func main() {
 	flag.Parse()
 	action := flag.Arg(0)
 
-	if action == "" {
-		fmt.Println("Specify an action")
-		return
-	}
-
 	switch action {
 	case "next":
 		Next()
@@ -25,9 +20,10 @@ func main() {
 		PlayPause()
 	case "cur":
 		CurSong()
+	case "":
+		fmt.Printf("Specify an action - valid options are next, prev, pause or cur\n")
 	default:
 		fmt.Printf("Invalid action %s\n", action)
-		return
 	}
 }
 
