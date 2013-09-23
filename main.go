@@ -13,11 +13,11 @@ func main() {
 
 	switch action {
 	case "next":
-		Next()
+		connDbus().Call("Next", 0)
 	case "prev":
-		Previous()
+		connDbus().Call("Previous", 0)
 	case "pause":
-		PlayPause()
+		connDbus().Call("PlayPause", 0)
 	case "cur":
 		CurSong()
 	case "":
@@ -37,18 +37,6 @@ func connDbus() *dbus.Object {
 	}
 
 	return conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2")
-}
-
-func Next() {
-	connDbus().Call("Next", 0)
-}
-
-func Previous() {
-	connDbus().Call("Previous", 0)
-}
-
-func PlayPause() {
-	connDbus().Call("PlayPause", 0)
 }
 
 func CurSong() {
