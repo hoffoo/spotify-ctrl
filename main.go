@@ -21,9 +21,9 @@ func main() {
 	case "cur":
 		CurSong()
 	case "":
-		fmt.Printf("Specify an action - valid options are next, prev, pause or cur\n")
+		fmt.Printf("Specify an action - valid options are next, prev, pause, cur, or pass a url\n")
 	default:
-		fmt.Printf("Invalid action %s\n", action)
+		connDbus().Call("OpenUri", 0, action)
 	}
 }
 
