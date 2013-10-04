@@ -8,6 +8,10 @@ go-spotify next
 go-spotify prev
 go-spotify pause		# pause toggle
 
-# print ARTIST "TRACK" (SPOTIFY RATING) - good for conky
-go-spotify cur
+# print current song: 'artist "track" (spotify rating)' - I use it for conky
+go-spotify
+
+# open a url
+go-spotify http://open.spotify.com/track/1ipS1pdAnpqTz0QMZePTz1
+
 ```

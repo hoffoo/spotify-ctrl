@@ -18,10 +18,8 @@ func main() {
 		connDbus().Call("Previous", 0)
 	case "pause":
 		connDbus().Call("PlayPause", 0)
-	case "cur":
-		CurSong()
 	case "":
-		fmt.Printf("Specify an action - valid options are next, prev, pause, cur, or pass a url\n")
+		CurSong()
 	default:
 		connDbus().Call("OpenUri", 0, action)
 	}
