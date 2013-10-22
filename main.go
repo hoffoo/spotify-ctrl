@@ -121,8 +121,7 @@ func Art(url string) {
 	outfile, err := os.OpenFile(ART_CACHE+filename, os.O_RDONLY, 0660)
 
 	if os.IsNotExist(err) {
-		resp, err := http.Get("https://d3rt1990lpmkn.cloudfront.net/unbranded/" + filename)
-		defer resp.Body.Close()
+		resp, err := http.Get("http://d3rt1990lpmkn.cloudfront.net/unbranded/" + filename)
 
 		if err != nil {
 			fmt.Fprintln(os.Stderr, "couldnt download album art")
@@ -132,6 +131,7 @@ func Art(url string) {
 		outfile, err = os.Create(ART_CACHE+filename)
 
 		io.Copy(outfile, resp.Body)
+		resp.Body.Close()
 	}
 
 	os.Remove(ART_CACHE+"cur")
