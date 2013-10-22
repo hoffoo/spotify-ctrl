@@ -22,6 +22,8 @@ func main() {
 	flag.BoolVar(&img, "i", false, "get album art image")
 	flag.Parse()
 
+	action := flag.Arg(0)
+
 	if img {
 		u, err := user.Current()
 		if err != nil{
@@ -29,8 +31,6 @@ func main() {
 		}
 		ART_CACHE = u.HomeDir+ART_BASE
 	}
-
-	action := flag.Arg(0)
 
 	sdbus = connDbus()
 	switch action {
@@ -48,11 +48,6 @@ func main() {
 			fmt.Printf("(paused) %s %s (paused)", artist[0], title)
 		} else {
 			fmt.Printf("%s %s (%d)", artist[0], title, rating)
-		}
-
-		if img == true {
-			artUrl := songData["mpris:artUrl"].Value().(string)
-			Art(artUrl)
 		}
 	case "url":
 		song := Metadata()
@@ -121,7 +116,7 @@ func Art(url string) {
 	outfile, err := os.OpenFile(ART_CACHE+filename, os.O_RDONLY, 0660)
 
 	if os.IsNotExist(err) {
-		resp, err := http.Get("http://open.spotify.com/image/" + filename)
+		resp, err := http.Get("https://d3rt1990lpmkn.cloudfront.net/unbranded/" + filename)
 		defer resp.Body.Close()
 
 		if err != nil {
@@ -134,5 +129,6 @@ func Art(url string) {
 		io.Copy(outfile, resp.Body)
 	}
 
+	os.Remove(ART_CACHE+"cur")
 	os.Link(ART_CACHE+filename, ART_CACHE+"cur")
 }
