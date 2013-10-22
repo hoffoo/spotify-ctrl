@@ -49,6 +49,11 @@ func main() {
 		} else {
 			fmt.Printf("%s %s (%d)", artist[0], title, rating)
 		}
+
+		if img == true {
+			artUrl := songData["mpris:artUrl"].Value().(string)
+			Art(artUrl)
+		}
 	case "url":
 		song := Metadata()
 
