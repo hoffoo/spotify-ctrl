@@ -1,25 +1,30 @@
 package main
 
 import (
+	dbus "../go.dbus" // "github.com/hoffoo/go.dbus"
 	"flag"
 	"fmt"
-	dbus "github.com/guelfey/go.dbus"
+	//"os"
 	"strings"
 )
 
+var sdbus *dbus.Object
+
+const ART_CACHE = "~/.spotify-art/"
+
 func main() {
 
+	var img bool
+	flag.BoolVar(&img, "i", false, "get album art image")
 	flag.Parse()
+
 	action := flag.Arg(0)
 
+	sdbus = connDbus()
 	switch action {
 	case "":
-		song, pstatus, err := CurSong()
-
-		if err != "" {
-			fmt.Printf(err)
-			return
-		}
+		song := Metadata()
+		pstatus := Status()
 
 		// buggy spotify dbus only sends a single artist
 		songData := song.Value().(map[string]dbus.Variant)
@@ -33,24 +38,19 @@ func main() {
 			fmt.Printf("%s %s (%d)", artist[0], title, rating)
 		}
 	case "url":
-		song, _, err := CurSong()
-
-		if err != "" {
-			fmt.Printf(err)
-			return
-		}
+		song := Metadata()
 
 		songData := song.Value().(map[string]dbus.Variant)
 		url := songData["xesam:url"].Value().(string)
-		fmt.Printf("http://open.spotify.com/track/%s", strings.Split(url, ":")[2])
+		fmt.Printf("http://open.spotify.com/track/%s\n", strings.Split(url, ":")[2])
 	case "next":
-		connDbus().Call("Next", 0)
+		MethodCall("Next")
 	case "prev":
-		connDbus().Call("Previous", 0)
+		MethodCall("Previous")
 	case "pause":
-		connDbus().Call("PlayPause", 0)
+		MethodCall("PlayPause")
 	default:
-		connDbus().Call("OpenUri", 0, action)
+		OpenUri(action)
 	}
 }
 
@@ -66,19 +66,39 @@ func connDbus() *dbus.Object {
 	return conn.Object("org.mpris.MediaPlayer2.spotify", "/org/mpris/MediaPlayer2")
 }
 
-func CurSong() (*dbus.Variant, *dbus.Variant, string) {
+func MethodCall(method string) {
+	sdbus.Call(method, 0)
+}
 
-	song := new(dbus.Variant)    // song data
-	pstatus := new(dbus.Variant) // playing status
-	sdbus := connDbus()
+func OpenUri(uri string) {
+	sdbus.Call("OpenUri", 0, uri)
+}
+
+func Metadata() *dbus.Variant {
 
 	// get song data, quit on err
-	err := sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player", "Metadata").Store(song)
+	song, err := sdbus.GetProperty("org.mpris.MediaPlayer2.Player.Metadata")
 	if err != nil {
-		// most likely spotify not running
-		return nil, nil, "Couldnt send to Dbus - is spotify running?"
+		panic(err) // most likely dbus not running
 	}
-	sdbus.Call("Get", 0, "org.mpris.MediaPlayer2.Player", "PlaybackStatus").Store(pstatus)
 
-	return song, pstatus, ""
+	return &song
 }
+
+func Status() *dbus.Variant {
+
+	pstatus, err := sdbus.GetProperty("org.mpris.MediaPlayer2.Player.PlaybackStatus")
+
+	if err != nil {
+		panic(err) // most likely dbus not running
+	}
+
+	return &pstatus
+}
+
+//func FetchArt(url string) {
+//
+//	idx := strings.LastIndex(url, "/")
+//	filename := url[idx+1:]
+//
+//}
