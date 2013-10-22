@@ -1,7 +1,8 @@
 package main
 
 import (
-	dbus "../go.dbus" // "github.com/hoffoo/go.dbus"
+	//dbus "../go.dbus"
+	dbus "github.com/hoffoo/go.dbus"
 	"flag"
 	"fmt"
 	//"os"
