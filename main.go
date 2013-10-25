@@ -12,9 +12,9 @@ import (
 )
 
 var sdbus *dbus.Object
+var ART_CACHE string
 
 const ART_BASE = "/.spotify-art/"
-var ART_CACHE string
 
 func main() {
 
@@ -24,18 +24,11 @@ func main() {
 
 	action := flag.Arg(0)
 
-	if img {
-		u, err := user.Current()
-		if err != nil{
-			panic(err)
-		}
-		ART_CACHE = u.HomeDir+ART_BASE
-	}
-
 	sdbus = connDbus()
+	var song *dbus.Variant
 	switch action {
 	case "":
-		song := Metadata()
+		song = Metadata()
 		pstatus := Status()
 
 		// buggy spotify dbus only sends a single artist
@@ -48,11 +41,6 @@ func main() {
 			fmt.Printf("(paused) %s %s (paused)", artist[0], title)
 		} else {
 			fmt.Printf("%s %s (%d)", artist[0], title, rating)
-		}
-
-		if img == true {
-			artUrl := songData["mpris:artUrl"].Value().(string)
-			Art(artUrl)
 		}
 	case "url":
 		song := Metadata()
@@ -68,6 +56,23 @@ func main() {
 		MethodCall("PlayPause")
 	default:
 		OpenUri(action)
+	}
+
+	// if we supplied the image arg update the album art
+	if img {
+		u, err := user.Current()
+		if err != nil {
+			panic(err)
+		}
+
+		ART_CACHE = u.HomeDir + ART_BASE
+		if song == nil {
+			song = Metadata()
+		}
+
+		songData := song.Value().(map[string]dbus.Variant)
+		artUrl := songData["mpris:artUrl"].Value().(string)
+		Art(artUrl)
 	}
 }
 
@@ -96,7 +101,7 @@ func Metadata() *dbus.Variant {
 	// get song data, quit on err
 	song, err := sdbus.GetProperty("org.mpris.MediaPlayer2.Player.Metadata")
 	if err != nil {
-		panic(err) // most likely dbus not running
+		panic(err) // most likely spotify not running
 	}
 
 	return &song
@@ -107,7 +112,7 @@ func Status() *dbus.Variant {
 	pstatus, err := sdbus.GetProperty("org.mpris.MediaPlayer2.Player.PlaybackStatus")
 
 	if err != nil {
-		panic(err) // most likely dbus not running
+		panic(err) // most likely spotify not running
 	}
 
 	return &pstatus
@@ -128,12 +133,21 @@ func Art(url string) {
 			return
 		}
 
-		outfile, err = os.Create(ART_CACHE+filename)
+		outfile, _ = os.Create(ART_CACHE + filename)
 
-		io.Copy(outfile, resp.Body)
+		_, ioerr := io.Copy(outfile, resp.Body)
 		resp.Body.Close()
+
+		if ioerr != nil {
+			outfile.Close()
+			os.Remove(ART_CACHE + filename)
+			fmt.Fprintln(os.Stderr, "failed getting the full album art file")
+			return
+		}
+
+		outfile.Close()
 	}
 
-	os.Remove(ART_CACHE+"cur")
+	os.Remove(ART_CACHE + "cur")
 	os.Link(ART_CACHE+filename, ART_CACHE+"cur")
 }
