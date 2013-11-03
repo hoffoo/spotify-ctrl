@@ -8,7 +8,9 @@ import (
 	"net/http"
 	"os"
 	"os/user"
+	"os/signal"
 	"strings"
+	"syscall"
 )
 
 var sdbus *dbus.Object
@@ -125,7 +127,16 @@ func Art(url string) {
 
 	outfile, err := os.OpenFile(ART_CACHE+filename, os.O_RDONLY, 0660)
 
+
 	if os.IsNotExist(err) {
+		sig := make(chan os.Signal, 1)
+		signal.Notify(sig, syscall.SIGTERM, syscall.SIGQUIT)
+
+		go func() {
+			<-sig
+			os.Remove(ART_CACHE + filename)
+		}()
+
 		resp, err := http.Get("http://d3rt1990lpmkn.cloudfront.net/unbranded/" + filename)
 
 		if err != nil {
@@ -141,11 +152,12 @@ func Art(url string) {
 		if ioerr != nil {
 			outfile.Close()
 			os.Remove(ART_CACHE + filename)
-			fmt.Fprintln(os.Stderr, "failed getting the full album art file")
+			fmt.Fprintln(os.Stderr, "failed getting the album art file")
 			return
 		}
 
 		outfile.Close()
+		close(sig)
 	}
 
 	os.Remove(ART_CACHE + "cur")
