@@ -7,8 +7,8 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/user"
 	"os/signal"
+	"os/user"
 	"strings"
 	"syscall"
 )
@@ -126,7 +126,6 @@ func Art(url string) {
 	filename := url[idx+1:]
 
 	outfile, err := os.OpenFile(ART_CACHE+filename, os.O_RDONLY, 0660)
-
 
 	if os.IsNotExist(err) {
 		sig := make(chan os.Signal, 1)
