@@ -3,7 +3,6 @@ package main
 import (
     "flag"
     "fmt"
-    dbus "github.com/hoffoo/go.dbus"
     "io"
     "net/http"
     "os"
@@ -11,6 +10,9 @@ import (
     "os/user"
     "strings"
     "syscall"
+
+    clyrics "github.com/hoffoo/go-chartlyrics"
+    dbus "github.com/hoffoo/go.dbus"
 )
 
 /*
@@ -182,5 +184,25 @@ func Art(url string) {
 }
 
 func Lyric(artist, title string) {
-    fmt.Println("not implemented")
+    title = strings.Replace(title, "\"", "", -1)
+    r, err := clyrics.SearchLyricDirect(artist, title)
+
+    fmt.Printf("Lyrics:  %s, %s\n\n", artist, title)
+
+    if err != nil {
+        fmt.Printf("Fetching Failed: %s\n", err)
+    } else if strings.Trim(r.Lyric, "") == "" { // TODO better check for no lyrics
+        r, err = clyrics.SearchLyric(artist, title, 20)
+
+        if err != nil {
+            fmt.Printf("Error getting song update link: %s", err)
+        } else {
+            fmt.Printf("No lyrics. You should add them here:\n", r.LyricUrl)
+            for _, k := range r.SearchLyricResult {
+                fmt.Printf("\n%s", k.SongUrl)
+            }
+        }
+    } else {
+        fmt.Printf("%s\n", r.Lyric)
+    }
 }
