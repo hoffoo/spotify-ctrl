@@ -26,17 +26,15 @@ func main() {
     switch action {
     case "next":
         SpotifyMethod("Next")
-        return
     case "prev":
         SpotifyMethod("Previous")
-        return
     case "pause":
         SpotifyMethod("PlayPause")
-        return
     }
 
     S := new(Spotify)
     S.Get()
+
     switch action {
     case "":
         if S.Status == "Paused" {
@@ -51,17 +49,20 @@ func main() {
     }
 
     // if we supplied the -i arg update the album art
-    if img {
-        u, err := user.Current()
-        if err != nil {
-            panic(err)
-        }
+    u, err := user.Current()
+    if err != nil {
+        panic(err)
+    }
 
-        ART_CACHE = u.HomeDir + ART_BASE
+    ART_CACHE = u.HomeDir + ART_BASE
+    if img {
         err = GetArt(ART_CACHE, S.ArtUrl)
         if err != nil {
             fmt.Fprintln(os.Stderr, err)
         }
     }
+
+    Notify(S)
+
 }
 

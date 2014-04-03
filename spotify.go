@@ -2,6 +2,7 @@ package main
 
 import (
     dbus "github.com/hoffoo/go.dbus"
+    "strings"
 )
 
 var sdbus *dbus.Object
@@ -13,6 +14,7 @@ type Spotify struct {
     Status string
     Url    string
     ArtUrl string
+    ArtFile string
 }
 
 // Updates the spotify struct with current data from spotify
@@ -33,6 +35,9 @@ func (c *Spotify) Get() {
     c.Status = pstatus.Value().(string)
     c.Url = songData["xesam:url"].Value().(string)
     c.ArtUrl = songData["mpris:artUrl"].Value().(string)
+
+    idx := strings.LastIndex(c.ArtUrl, "/")
+    c.ArtFile = c.ArtUrl[idx+1:]
 }
 
 func SpotifyMethod(method string) error {
