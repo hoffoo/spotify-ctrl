@@ -62,7 +62,5 @@ func main() {
         }
     }
 
-    Notify(S)
-
 }
 
