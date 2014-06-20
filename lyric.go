@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-    clyrics "github.com/hoffoo/go-chartlyrics"
+	clyrics "github.com/hoffoo/go-chartlyrics"
 )
 
 // Download lyrics from chartlyrics
@@ -28,5 +28,5 @@ func Lyric(artist, title string) (err error) {
 		fmt.Printf("%s\n", r.Lyric)
 	}
 
-    return nil
+	return nil
 }
