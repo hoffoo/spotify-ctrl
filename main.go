@@ -42,14 +42,16 @@ func main() {
 		fmt.Printf("http://open.spotify.com/track/%s\n", strings.Split(S.Url, ":")[2])
 	}
 
-	// if we supplied the -i arg update the album art
-	u, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
 
-	ART_CACHE = u.HomeDir + ART_BASE
+	// if we supplied the -i arg update the album art
 	if img {
+
+		u, err := user.Current()
+		if err != nil {
+			panic(err)
+		}
+	
+		ART_CACHE = u.HomeDir + ART_BASE
 		err = GetArt(ART_CACHE, S.ArtUrl)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
